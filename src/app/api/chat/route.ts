@@ -25,7 +25,8 @@ export const dynamic = "force-dynamic";
 const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
 // Default to a free model. Override with OPENROUTER_MODEL in .env.
 // Browse available models at https://openrouter.ai/models (filter: free)
-const DEFAULT_MODEL = "google/gemini-2.0-flash-exp:free";
+// Last verified available: Oct 2026 (14 free models on OpenRouter)
+const DEFAULT_MODEL = "nvidia/nemotron-3.5-super-vl:free";
 
 export async function POST(req: Request) {
   const _rl = checkRateLimit(req, LIMITS.chat, "chat"); if (_rl) return _rl;
