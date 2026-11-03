@@ -55,6 +55,7 @@ next-env.d.ts
 
 # Test + dev scripts (never push — may contain API keys)
 final-regression-test.ts
+full-regression-test.ts
 *.test.ts
 tests/
 tool-results/

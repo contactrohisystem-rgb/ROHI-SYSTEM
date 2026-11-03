@@ -46,7 +46,7 @@ async function getResend() {
 export async function notifyTeamOfEnquiry(data: EnquiryData) {
   const resend = await getResend();
   if (!resend) return;
-  const teamEmail = process.env.TEAM_EMAIL || "onboarding@resend.dev";
+  const teamEmail = process.env.TEAM_EMAIL || "contactrohisystem@gmail.com";
   try {
     await resend.emails.send({
       from: FROM,

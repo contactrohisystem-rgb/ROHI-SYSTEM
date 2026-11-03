@@ -36,7 +36,7 @@ FIMS is a ROHI SYSTEMS product in controlled development. Not the definition of 
 - Contact page: /contact
 - Contact form fields: Name, Company, Email, Phone/WhatsApp, What do you need?, Tell us about the business problem, Current process, Current technology, What would success look like?, Budget range, Preferred contact method.
 - The chat "Start a Conversation" button hands off conversation context into the contact form.
-- Email: hello@rohi.systems (placeholder)
+- Email: contactrohisystem@gmail.com
 - WhatsApp: +258 84 000 0000 (placeholder)
 - Address: Maputo, Mozambique
 

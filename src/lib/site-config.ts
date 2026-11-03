@@ -16,8 +16,8 @@ export const SITE_CONFIG = {
   whatsappNumber: "258840000000", // TODO: set real WhatsApp Business number
   whatsappDisplay: "+258 84 000 0000", // TODO: set real display number
 
-  // TODO: set real email
-  email: "hello@rohi.systems",
+  // Contact email (Gmail until rohi.systems domain is registered + verified)
+  email: "contactrohisystem@gmail.com",
 
   // TODO: set real Maputo address
   addressLine: "Maputo, Mozambique",
