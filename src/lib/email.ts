@@ -90,3 +90,36 @@ export async function sendAutoReply(data: EnquiryData) {
     console.error("[email] auto-reply failed", err);
   }
 }
+
+/**
+ * Welcome email sent to new newsletter subscribers.
+ * Includes an unsubscribe link (required by Mozambique Lei 3/2017 Art 40(6)
+ * for commercial/marketing electronic communications).
+ *
+ * The unsubscribe URL uses the site's own /api/unsubscribe endpoint.
+ * In production, BASE_URL should be set to the real domain (e.g., https://rohi.systems).
+ */
+export async function sendNewsletterWelcome(email: string) {
+  const resend = await getResend();
+  if (!resend) return;
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.BASE_URL || "https://rohi.systems";
+  const unsubscribeUrl = `${baseUrl}/api/unsubscribe?email=${encodeURIComponent(email)}`;
+  try {
+    await resend.emails.send({
+      from: FROM,
+      to: email,
+      subject: "Welcome to ROHI Insights",
+      html: `<div style="font-family:sans-serif;max-width:560px;margin:0 auto;padding:24px;">
+          <p style="font-size:11px;text-transform:uppercase;letter-spacing:0.18em;color:#20C7C9;">ROHI SYSTEMS</p>
+          <h1 style="font-size:24px;margin:8px 0 16px;">Welcome to ROHI Insights.</h1>
+          <p style="font-size:16px;line-height:1.6;color:#374151;">Thank you for subscribing. You'll hear from us when we publish something worth your time — practical perspectives on systems, AI, automation, and data, written for people who build and run organizations.</p>
+          <p style="font-size:16px;line-height:1.6;color:#374151;">No spam. No fluff. Just signal.</p>
+          <p style="font-size:14px;color:#667085;margin-top:24px;">Technology That Moves Business.<br>Built in Mozambique.</p>
+          <hr style="margin-top:32px;border:none;border-top:1px solid #e5e7eb;">
+          <p style="font-size:12px;color:#9ca3af;margin-top:16px;">You're receiving this because you subscribed at ${esc(baseUrl)}. <a href="${unsubscribeUrl}" style="color:#20C7C9;">Unsubscribe</a>.</p>
+        </div>`,
+    });
+  } catch (err) {
+    console.error("[email] newsletter welcome failed", err);
+  }
+}

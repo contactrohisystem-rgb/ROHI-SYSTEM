@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { checkRateLimit, LIMITS } from "@/lib/rate-limit";
 import { isBot } from "@/lib/honeypot";
+import { sendNewsletterWelcome } from "@/lib/email";
 import { z } from "zod";
 
 const schema = z.object({
@@ -30,12 +31,16 @@ export async function POST(req: Request) {
   if (isBot(body as Record<string, unknown>)) return NextResponse.json({ ok: true }, { status: 201 });
   const email = parsed.data.email.toLowerCase().trim();
   try {
-    // upsert — ignore duplicate-email errors gracefully
-    await db.subscriber.upsert({
-      where: { email },
-      create: { email, source: parsed.data.source || null },
-      update: {},
-    });
+    // upsert — if the email already exists, update nothing (idempotent).
+    // Track whether this is a NEW subscriber to decide if we send the welcome email.
+    const existing = await db.subscriber.findUnique({ where: { email } });
+    if (!existing) {
+      await db.subscriber.create({
+        data: { email, source: parsed.data.source || null },
+      });
+      // Send welcome email (fire-and-forget — only if RESEND_API_KEY is set)
+      void sendNewsletterWelcome(email);
+    }
     return NextResponse.json({ ok: true }, { status: 201 });
   } catch (err) {
     console.error("[subscribe] failed", err);
