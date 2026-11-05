@@ -1,22 +1,13 @@
+
 name: Mirror to Website Repo
 
 # Auto-mirrors every push to main from shepherdchikanda/ROHI-SYSTEM
 # to contactrohisystem-rgb/ROHI-SYSTEM (the repo Vercel deploys from).
-#
-# Setup required (one-time):
-#   1. Create a fine-grained PAT on the contactrohisystem-rgb account
-#      with "Contents: Read and write" on the ROHI-SYSTEM repo.
-#   2. Add it as a repository secret named MIRROR_TOKEN in
-#      shepherdchikanda/ROHI-SYSTEM → Settings → Secrets → Actions.
-#
-# After setup, every push to main on shepherdchikanda/ROHI-SYSTEM
-# automatically appears in contactrohisystem-rgb/ROHI-SYSTEM within ~30s,
-# which triggers Vercel to redeploy.
 
 on:
   push:
     branches: [main]
-  workflow_dispatch: # allows manual trigger from the Actions tab
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -26,23 +17,28 @@ jobs:
     name: Push to contactrohisystem-rgb/ROHI-SYSTEM
     runs-on: ubuntu-latest
     timeout-minutes: 5
+
     steps:
       - name: Checkout source repo
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
-          fetch-depth: 0 # full history — needed for a clean mirror push
+          fetch-depth: 0
+          persist-credentials: false
 
       - name: Push to website repo
         env:
           MIRROR_TOKEN: ${{ secrets.MIRROR_TOKEN }}
         run: |
           if [ -z "$MIRROR_TOKEN" ]; then
-            echo "::error::MIRROR_TOKEN secret is not set. Add it in shepherdchikanda/ROHI-SYSTEM → Settings → Secrets and variables → Actions → New repository secret."
+            echo "::error::MIRROR_TOKEN secret is not set."
             exit 1
           fi
+
           git remote add website "https://x-access-token:${MIRROR_TOKEN}@github.com/contactrohisystem-rgb/ROHI-SYSTEM.git"
+
           git push website main --force
-          echo "::notice::Mirrored to contactrohisystem-rgb/ROHI-SYSTEM ✅"
+
+          echo "::notice::Mirrored to contactrohisystem-rgb/ROHI-SYSTEM"
 
       - name: Verify mirror
         env:
@@ -50,12 +46,18 @@ jobs:
         run: |
           echo "Source HEAD: $(git rev-parse HEAD)"
           echo "Checking website repo HEAD..."
-          WEBSITE_HEAD=$(curl -sf -H "Authorization: token ${MIRROR_TOKEN}" \
+
+          WEBSITE_HEAD=$(curl -sf \
+            -H "Authorization: Bearer ${MIRROR_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
             "https://api.github.com/repos/contactrohisystem-rgb/ROHI-SYSTEM/commits/main" \
             | python3 -c "import sys,json; print(json.load(sys.stdin)['sha'])" 2>/dev/null || echo "FAILED")
+
           echo "Website HEAD: ${WEBSITE_HEAD}"
+
           if [ "$(git rev-parse HEAD)" = "${WEBSITE_HEAD}" ]; then
-            echo "::notice::Mirror verified — both repos are in sync ✅"
+            echo "::notice::Mirror verified — both repositories are in sync"
           else
-            echo "::warning::Heads differ — mirror may still be propagating"
+            echo "::error::Mirror verification failed — repository HEADs differ."
+            exit 1
           fi
