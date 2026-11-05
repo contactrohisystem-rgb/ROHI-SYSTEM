@@ -52,7 +52,7 @@ export async function POST(req: Request) {
   const apiKey = process.env.OPENROUTER_API_KEY;
   if (!apiKey) {
     return new Response(
-      "The AI assistant isn't configured yet. Set OPENROUTER_API_KEY in the .env file. Get a free key at https://openrouter.ai/keys.",
+      "I'm having trouble responding right now. Please try again in a moment, or reach the ROHI team through the contact page.",
       { status: 503, headers: { "Content-Type": "text/plain; charset=utf-8" } },
     );
   }

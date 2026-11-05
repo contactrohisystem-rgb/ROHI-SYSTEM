@@ -65,7 +65,9 @@ export function SiteFooter() {
                 real details are provided; update src/lib/site-config.ts). */}
             <div className="mt-7 flex flex-col gap-2.5">
               <a
-                href={`mailto:${SITE_CONFIG.email}`}
+                href={`https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(SITE_CONFIG.email)}`}
+                target="_blank"
+                rel="noopener noreferrer"
                 data-slot="rohi-button"
                 className="inline-flex items-center gap-2.5 text-sm text-white/70 transition-colors hover:text-teal"
               >
