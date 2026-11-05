@@ -6,8 +6,9 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")   // pooled (pgbouncer) — used by the app at runtime
+  directUrl = env("DIRECT_URL")     // direct connection — used for migrations/db push
 }
 
 // ROHI SYSTEMS — business enquiries submitted via the Contact section.
