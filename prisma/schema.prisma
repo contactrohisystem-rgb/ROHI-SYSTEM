@@ -26,6 +26,11 @@ model Enquiry {
   budgetRange       String?
   preferredContact  String?
   createdAt         DateTime @default(now())
+
+  // Admin dashboard fields
+  status            String   @default("new") // new, contacted, proposal_sent, won, lost
+  notes             String?
+  followUpDate      DateTime?
 }
 
 // Newsletter subscribers (Insights page).
