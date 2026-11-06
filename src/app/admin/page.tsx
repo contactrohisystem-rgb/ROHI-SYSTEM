@@ -26,6 +26,9 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; icon: typeof
   proposal_sent: { label: "Proposal Sent", color: "bg-purple-100 text-purple-700 border-purple-200", icon: FileText },
   won: { label: "Won", color: "bg-green-100 text-green-700 border-green-200", icon: CheckCircle2 },
   lost: { label: "Lost", color: "bg-red-100 text-red-700 border-red-200", icon: XCircle },
+  in_progress: { label: "In Progress", color: "bg-cyan-100 text-cyan-700 border-cyan-200", icon: TrendingUp },
+  delivered: { label: "Delivered", color: "bg-teal-100 text-teal-700 border-teal-200", icon: CheckCircle2 },
+  ongoing: { label: "Ongoing", color: "bg-indigo-100 text-indigo-700 border-indigo-200", icon: TrendingUp },
 };
 
 export default function AdminPage() {
@@ -35,6 +38,7 @@ export default function AdminPage() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [selected, setSelected] = useState<Enquiry | null>(null);
+  const [dueFollowups, setDueFollowups] = useState<Enquiry[]>([]);
 
   // Check auth on mount
   useEffect(() => {
@@ -51,6 +55,7 @@ export default function AdminPage() {
       .then((data) => {
         if (data?.ok) {
           setEnquiries(data.enquiries);
+          setDueFollowups(data.dueFollowups || []);
         }
         setLoading(false);
       })
@@ -81,6 +86,7 @@ export default function AdminPage() {
     <Dashboard
       enquiries={enquiries}
       setEnquiries={setEnquiries}
+      dueFollowups={dueFollowups}
       search={search}
       setSearch={setSearch}
       statusFilter={statusFilter}
@@ -155,6 +161,7 @@ function LoginForm({ onLogin }: { onLogin: () => void }) {
 function Dashboard({
   enquiries,
   setEnquiries,
+  dueFollowups,
   search,
   setSearch,
   statusFilter,
@@ -166,6 +173,7 @@ function Dashboard({
 }: {
   enquiries: Enquiry[];
   setEnquiries: React.Dispatch<React.SetStateAction<Enquiry[]>>;
+  dueFollowups: Enquiry[];
   search: string;
   setSearch: (v: string) => void;
   statusFilter: string;
@@ -212,6 +220,32 @@ function Dashboard({
       </header>
 
       <div className="mx-auto max-w-7xl px-4 py-6">
+        {/* Follow-ups due alert */}
+        {dueFollowups.length > 0 && (
+          <div className="mb-6 rounded-xl border border-amber-200 bg-amber-50 p-4">
+            <div className="flex items-center gap-2">
+              <Clock className="size-5 text-amber-600" />
+              <h3 className="font-semibold text-amber-900">
+                {dueFollowups.length} follow-up{dueFollowups.length > 1 ? "s" : ""} due
+              </h3>
+            </div>
+            <div className="mt-2 space-y-1">
+              {dueFollowups.slice(0, 5).map((e) => (
+                <button
+                  key={e.id}
+                  onClick={() => setSelected(e)}
+                  className="block w-full text-left text-sm text-amber-800 hover:underline"
+                >
+                  • {e.name} — due {e.followUpDate ? new Date(e.followUpDate).toLocaleDateString() : ""}
+                </button>
+              ))}
+              {dueFollowups.length > 5 && (
+                <p className="text-xs text-amber-600">+ {dueFollowups.length - 5} more...</p>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Stats */}
         <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
           <StatCard label="Total" value={stats.total} icon={TrendingUp} color="text-gray-700" />
@@ -243,6 +277,9 @@ function Dashboard({
             <option value="proposal_sent">Proposal Sent</option>
             <option value="won">Won</option>
             <option value="lost">Lost</option>
+            <option value="in_progress">In Progress</option>
+            <option value="delivered">Delivered</option>
+            <option value="ongoing">Ongoing</option>
           </select>
         </div>
 
@@ -420,6 +457,9 @@ function EnquiryDetail({
                 <option value="proposal_sent">Proposal Sent</option>
                 <option value="won">Won</option>
                 <option value="lost">Lost</option>
+                <option value="in_progress">In Progress</option>
+                <option value="delivered">Delivered</option>
+                <option value="ongoing">Ongoing</option>
               </select>
             </div>
 

@@ -26,7 +26,17 @@ export async function GET(req: Request) {
       orderBy: { createdAt: "desc" },
       take: 200,
     });
-    return NextResponse.json({ ok: true, enquiries });
+
+    // Also return follow-ups due (followUpDate <= today, status not won/lost/delivered)
+    const today = new Date();
+    const dueFollowups = enquiries.filter(
+      (e) =>
+        e.followUpDate &&
+        new Date(e.followUpDate) <= today &&
+        !["won", "lost", "delivered"].includes(e.status),
+    );
+
+    return NextResponse.json({ ok: true, enquiries, dueFollowups });
   } catch (err) {
     console.error("[admin] failed to list enquiries", err);
     return NextResponse.json({ ok: false, error: "Failed to load enquiries" }, { status: 500 });
@@ -35,7 +45,7 @@ export async function GET(req: Request) {
 
 const updateSchema = z.object({
   id: z.string(),
-  status: z.enum(["new", "contacted", "proposal_sent", "won", "lost"]).optional(),
+  status: z.enum(["new", "contacted", "proposal_sent", "won", "lost", "in_progress", "delivered", "ongoing"]).optional(),
   notes: z.string().max(5000).optional(),
   followUpDate: z.string().nullable().optional(), // ISO date string or null
 });
